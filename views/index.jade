@@ -1,4 +1,39 @@
 extends layout
 
+block head
+  script(src="https://maps.googleapis.com/maps/api/js?v=3.exp")
+  script(type='text/javascript').
+    var map;
+
+    function initialize() {
+      var mapOptions = {
+        zoom: 13,
+        mapTypeId: google.maps.MapTypeId.TERRAIN,
+        center: new google.maps.LatLng(50.982335, 2.041886)
+      };
+      map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+      var coordinates = [
+        new google.maps.LatLng(50.99, 2.05),
+        new google.maps.LatLng(50.98, 2.05),
+        new google.maps.LatLng(50.98, 2.04),
+        new google.maps.LatLng(50.99, 2.04),
+        new google.maps.LatLng(50.99, 2.05)
+      ];
+      var flightPath = new google.maps.Polyline({
+        path: coordinates,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+      });
+      flightPath.setMap(map);
+    }
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+
 block body
-  p Welcome to potatoes supervisor
+  br
+  br
+  br
+  div#map-canvas(style="height: 600px")
