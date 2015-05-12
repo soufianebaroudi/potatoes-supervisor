@@ -14,13 +14,15 @@ block head
       map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
       var coordinates = [
-        new google.maps.LatLng(50.99, 2.05),
-        new google.maps.LatLng(50.98, 2.05),
-        new google.maps.LatLng(50.98, 2.04),
-        new google.maps.LatLng(50.99, 2.04),
-        new google.maps.LatLng(50.99, 2.05)
+        new google.maps.LatLng(50.868341, 1.870481),
+        new google.maps.LatLng(50.853961, 1.976552),
+        new google.maps.LatLng(50.805306, 2.153443),
+        new google.maps.LatLng(50.878260, 2.080281),
+        new google.maps.LatLng(50.977291, 2.043284),
+        new google.maps.LatLng(50.906515, 1.932535)
+        
       ];
-      var flightPath = new google.maps.Polyline({
+      var flightPath = new google.maps.Polygon({
         path: coordinates,
         geodesic: true,
         strokeColor: '#FF0000',
