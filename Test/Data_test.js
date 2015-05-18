@@ -1,8 +1,22 @@
 var gdal = require("gdal");
+
+
 var dataset = gdal.open("../Data/parcellaire.shp");
+
 var layer = dataset.layers.get(0);
 
-console.log("number of features: " + layer.features.count());
-console.log("fields: " + layer.fields.getNames());
-console.log("extent: " + JSON.stringify(layer.extent));
-console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'));
+Tab = new Array();
+
+layer.features.forEach(function(feature) {
+	
+	Tab = feature.fields.getNames();
+	
+	
+	   for(var i = 0 ; i < Tab.length; i++) {
+						
+			console.log(Tab[i] + " " + feature.fields.get(Tab[i]));
+		}
+	
+			console.log(feature.getGeometry().toJSON());
+
+}); 
