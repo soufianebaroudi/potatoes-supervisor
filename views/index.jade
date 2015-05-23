@@ -1,36 +1,37 @@
 extends layout
 
 block head
-  script(src="https://maps.googleapis.com/maps/api/js?v=3.exp")
-  script(type='text/javascript').
+
+   script(src="https://maps.googleapis.com/maps/api/js?v=3.exp")
+   script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js")
+   script(type='text/javascript').
+
     var map;
 
     function initialize() {
       var mapOptions = {
-        zoom: 13,
+        zoom: 15,
         mapTypeId: google.maps.MapTypeId.TERRAIN,
-        center: new google.maps.LatLng(50.982335, 2.041886)
+        center: new google.maps.LatLng(49.03214771988825, 0.28707396981693)
       };
       map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-      var coordinates = [
-        new google.maps.LatLng(50.868341, 1.870481),
-        new google.maps.LatLng(50.853961, 1.976552),
-        new google.maps.LatLng(50.805306, 2.153443),
-        new google.maps.LatLng(50.878260, 2.080281),
-        new google.maps.LatLng(50.977291, 2.043284),
-        new google.maps.LatLng(50.906515, 1.932535)
-        
-      ];
-      var flightPath = new google.maps.Polygon({
-        path: coordinates,
-        geodesic: true,
-        strokeColor: '#FF0000',
-        strokeOpacity: 1.0,
-        strokeWeight: 2
-      });
-      flightPath.setMap(map);
-    }
+      $( document ).ready(function()
+          {
+              $.ajax
+              ({
+                type: "GET",
+                url: '/gdal',
+                success: function (data) {
+                  console.log(data);
+                    map.data.addGeoJson(data);
+                },
+                error: function () {
+                  console.log('process Error');
+                }
+              });
+          });
+        }
 
     google.maps.event.addDomListener(window, 'load', initialize);
 
