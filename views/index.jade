@@ -24,7 +24,8 @@ block head
                 url: '/gdal',
                 success: function (data) {
                   console.log(data);
-                    map.data.addGeoJson(data);
+                    var Data_R = JSON.parse(data);
+                    map.data.addGeoJson(Data_R);
                 },
                 error: function () {
                   console.log('process Error');
