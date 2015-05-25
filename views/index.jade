@@ -10,7 +10,7 @@ block head
 
     function initialize() {
       var mapOptions = {
-        zoom: 15,
+        zoom: 17,
         mapTypeId: google.maps.MapTypeId.TERRAIN,
         center: new google.maps.LatLng(49.03214771988825, 0.28707396981693)
       };
@@ -24,8 +24,7 @@ block head
                 url: '/gdal',
                 success: function (data) {
                   console.log(data);
-                    var Data_R = JSON.parse(data);
-                    map.data.addGeoJson(Data_R);
+                  map.data.addGeoJson(data);
                 },
                 error: function () {
                   console.log('process Error');
