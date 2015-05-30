@@ -1,8 +1,6 @@
 var express = require('express');
 var gdal = require('gdal');
-var fs = require('fs');
 var router = express.Router();
-
 
 var dataset = gdal.open("../Data/parcellaire.shp");
 var layer = dataset.layers.get(0);
@@ -28,9 +26,6 @@ router.get('/', function(req, res, next) {
     // Data List corresponding to Bounds sent from Client
 
     var list = [];
-
-
-
 
     layer.features.forEach(function(feature) {
 
