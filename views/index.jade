@@ -4,7 +4,7 @@ block head
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js")
     script(type='text/javascript').
         var map;
-        var concMax;
+        var ConcMaxTab = new Array();
 
         function initialize() {
             var mapOptions = {
@@ -28,8 +28,6 @@ block head
                 var swLongitude = bounds.getSouthWest().lng();
                 var swLatitude = bounds.getSouthWest().lng();
 
-                // Init Maximal Concentration
-                concMax = 0;
 
                 /*
                  Send Bounds Data
@@ -40,26 +38,57 @@ block head
                  */
 
                 $.ajax
-                ({
-                    cache: false,
-                    type: "GET",
-                    url: '/gdal',
-                    data: {
-                        neLatitude: neLatitude,
-                        neLongitude: neLongitude,
-                        swLatitude: swLatitude,
-                        swLongitude: swLongitude
-                    },
-                    success: function (data) {
-                        deletAllFeatures();
-                        map.data.addGeoJson(data);
-                        map.data.setStyle(styleFeature);
-                    },
-                    error: function () {
-                        console.log('process Error');
-                    }
-                });
+
+                    ({
+                            cache: false,
+                            type: "GET",
+                            url: '/gdal',
+                            data: {
+                                neLatitude: neLatitude,
+                                neLongitude: neLongitude,
+                                swLatitude: swLatitude,
+                                swLongitude: swLongitude
+                            },
+                            success: function (data) {
+
+                                deletAllFeatures();
+                                map.data.addGeoJson(data);
+
+                                for (var i = 0; i < ConcName.length; i++) {
+
+                                    var MaxConc = 0;
+                                    map.data.forEach(function(feature) {
+
+                                        if (feature.getProperty(ConcName[i]) > MaxConc)
+                                          {
+                                            MaxConc = feature.getProperty(ConcName[i]);
+                                        }
+                                    });
+
+                                    ConcMaxTab.push(MaxConc);
+                                };
+                            },
+                            error: function () {
+                                console.log('process Error');
+                            }
+                    });
+
             });
+
+            // Map Colors at T = 0
+
+            map.data.setStyle(styleFeature);
+
+            function styleFeature(feature) {
+
+                    feature.setProperty(ConcName[0], feature.getProperty(ConcName[0]) + (255 - ConcMaxTab[0]));
+
+                    return {
+                        fillColor: 'rgb(' + 0 + ',' + 0 + ',' + parseInt(feature.getProperty(ConcName[0])) + ')',
+                        fillOpacity: 0.75,
+                        strokeWeight: 0
+                    };
+            };
         }
 
         google.maps.event.addDomListener(window, 'load', initialize);
@@ -88,21 +117,9 @@ block head
             map.data.forEach(function (feature) {
                 map.data.remove(feature);
             });
-        };
-
-        // Map Colors at T = 0
-
-        function styleFeature(feature) {
-            if (feature.getProperty(ConcName[0]) > concMax) {
-                concMax = feature.getProperty(ConcName[0]);
-            }
-            feature.setProperty(ConcName[0], feature.getProperty(ConcName[0]) + (255 - concMax));
-            return {
-                fillColor: 'rgb(' + 0 + ',' + 0 + ',' + feature.getProperty(ConcName[0]) + ')',
-                fillOpacity: 0.55,
-                strokeWeight: 0
-            };
         }
+
+
 block body
     br
     br
