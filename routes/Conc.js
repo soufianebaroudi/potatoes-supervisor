@@ -7,18 +7,17 @@ var dataset = gdal.open("../Data/parcellaire.shp");
 var layer = dataset.layers.get(0);
 
 
+var ConcName = new Array();
 
+layer.fields.forEach(function(value , key) {
+
+
+    ConcName.push(value.name);
+
+});
 
 router.get('/', function(req, res, next) {
 
-    var ConcName = new Array();
-
-    layer.fields.forEach(function(value , key) {
-
-
-        ConcName.push(value.name);
-
-    });
 
 // send an array of Concetration Names
 

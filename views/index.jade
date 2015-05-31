@@ -3,14 +3,16 @@ block head
     script(src="https://maps.googleapis.com/maps/api/js?v=3.exp")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js")
     script(type='text/javascript').
+
         var map;
         var ConcMaxTab = new Array();
+        var ConcName = new Array();
 
         function initialize() {
             var mapOptions = {
                 zoom: 17,
                 mapTypeId: google.maps.MapTypeId.TERRAIN,
-                center: new google.maps.LatLng(49.03214771988825, 0.28707396981693)
+                center: new google.maps.LatLng(49.03337869061837, 0.28986346719240164)
             };
 
             map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
@@ -34,7 +36,6 @@ block head
                  receive a FeatureCollection
                  Clear the map
                  Put the new Data on Map
-                 Style each feature (t = 0)
                  */
 
                 $.ajax
@@ -75,7 +76,7 @@ block head
 
             });
 
-            // Map Colors at T = 0
+            // Concentrations at T = 0
 
             map.data.setStyle(styleFeature);
 
@@ -84,7 +85,7 @@ block head
                     feature.setProperty(ConcName[0], feature.getProperty(ConcName[0]) + (255 - ConcMaxTab[0]));
 
                     return {
-                        fillColor: 'rgb(' + 0 + ',' + 0 + ',' + parseInt(feature.getProperty(ConcName[0])) + ')',
+                        fillColor: 'rgb(' + parseInt(feature.getProperty(ConcName[0])) + ',' + 0 + ',' + 0 + ')',
                         fillOpacity: 0.75,
                         strokeWeight: 0
                     };
@@ -106,7 +107,8 @@ block head
                     },
                     error: function () {
                         console.log('process Error');
-                    }
+                    },
+                    async : false
                 });
             });
         };
@@ -117,7 +119,32 @@ block head
             map.data.forEach(function (feature) {
                 map.data.remove(feature);
             });
-        }
+        };
+
+        var Propagation = function() {
+
+
+            var i = 0;
+            var interval = setInterval(function () {
+                map.data.setStyle(function(feature) {
+
+                    feature.setProperty(ConcName[i], feature.getProperty(ConcName[i]) + (255 - ConcMaxTab[i]) );
+                    return {
+
+                        fillColor: 'rgb(' + parseInt(feature.getProperty(ConcName[i])) + ',' + 0 + ',' + 0 + ')',
+                        fillOpacity: 0.75,
+                        strokeWeight: 0
+
+                    };
+
+                });
+
+                i++;
+                if (i >= (ConcName.length -1)) clearInterval(interval);
+
+            }, 0.5);
+
+        };
 
 
 block body
@@ -125,3 +152,11 @@ block body
     br
     br
     div#map-canvas(style="height: 600px")
+    br
+    br
+    button#Black(
+    title='Propagation',
+    type='submit'
+    style='width: 120px; height: 23px; ;'
+    onclick= 'Propagation()',
+    ) Propagation
