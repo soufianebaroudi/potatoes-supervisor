@@ -1,7 +1,9 @@
 extends layout
 block head
+
     script(src="https://maps.googleapis.com/maps/api/js?v=3.exp")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.js")
     script(type='text/javascript').
 
         var map;
@@ -9,12 +11,12 @@ block head
         var ConcName = new Array();
 
         function initialize() {
+
             var mapOptions = {
                 zoom: 17,
                 mapTypeId: google.maps.MapTypeId.TERRAIN,
                 center: new google.maps.LatLng(49.03337869061837, 0.28986346719240164)
             };
-
             map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
             // Call an Array of Concentration Names ( To avoid Calling it every bounds event )
@@ -24,82 +26,76 @@ block head
             google.maps.event.addListener(map, 'idle', function () {
 
                 // Get Bounds Data
+
                 bounds = map.getBounds();
                 var neLongitude = bounds.getNorthEast().lng();
                 var neLatitude = bounds.getNorthEast().lat();
                 var swLongitude = bounds.getSouthWest().lng();
                 var swLatitude = bounds.getSouthWest().lng();
 
-
                 /*
-                 Send Bounds Data
-                 receive a FeatureCollection
-                 Clear the map
-                 Put the new Data on Map
+                    -- Send Bounds Data
+                    -- receive a FeatureCollection
+                    -- Clear the map
+                    -- Put the new Data on Map
                  */
 
                 $.ajax
 
-                    ({
-                            cache: false,
-                            type: "GET",
-                            url: '/gdal',
-                            data: {
-                                neLatitude: neLatitude,
-                                neLongitude: neLongitude,
-                                swLatitude: swLatitude,
-                                swLongitude: swLongitude
-                            },
-                            success: function (data) {
-
-                                deletAllFeatures();
-                                map.data.addGeoJson(data);
-
-                                for (var i = 0; i < ConcName.length; i++) {
-
-                                    var MaxConc = 0;
-                                    map.data.forEach(function(feature) {
-
-                                        if (feature.getProperty(ConcName[i]) > MaxConc)
-                                          {
-                                            MaxConc = feature.getProperty(ConcName[i]);
-                                        }
-                                    });
-
-                                    ConcMaxTab.push(MaxConc);
-                                };
-                            },
-                            error: function () {
-                                console.log('process Error');
-                            }
-                    });
-
+                ({
+                    cache: false,
+                    type: "GET",
+                    url: '/gdal',
+                    data: {
+                        neLatitude: neLatitude,
+                        neLongitude: neLongitude,
+                        swLatitude: swLatitude,
+                        swLongitude: swLongitude
+                    },
+                    success: function (data) {
+                        deletAllFeatures();
+                        map.data.addGeoJson(data);
+                        for (var i = 0; i < ConcName.length; i++) {
+                            var MaxConc = 0;
+                            map.data.forEach(function (feature) {
+                                if (feature.getProperty(ConcName[i]) > MaxConc) {
+                                    MaxConc = feature.getProperty(ConcName[i]);
+                                }
+                            });
+                            ConcMaxTab.push(MaxConc);
+                        };
+                    },
+                    error: function () {
+                        console.log('process Error');
+                    }
+                });
             });
 
-            // Concentrations at T = 0
+            // Init map style
 
-            map.data.setStyle(styleFeature);
+            InitColors();
 
-            function styleFeature(feature) {
+            // get information by feature (Draw Chart)
 
-                    feature.setProperty(ConcName[0], feature.getProperty(ConcName[0]) + (255 - ConcMaxTab[0]));
+            getInformation();
 
-                    return {
-                        fillColor: 'rgb(' + parseInt(feature.getProperty(ConcName[0])) + ',' + 0 + ',' + 0 + ')',
-                        fillOpacity: 0.75,
-                        strokeWeight: 0
-                    };
-            };
         }
 
         google.maps.event.addDomListener(window, 'load', initialize);
 
-        // Load Page (Get an Array of Concentration names )
+
+
+        // ------------------------------------------------------  [Fucntions]  ------------------------------------------------- //
+
+
+             // ---------------------------- Load Page ( Get an Array of Concentration names ) -----------------------
+
 
         var LoadPage = function () {
             $(document).ready(function () {
                 $.ajax
                 ({
+                    cache: false,
                     type: "GET",
                     url: '/Conc',
                     success: function (data) {
@@ -108,12 +104,13 @@ block head
                     error: function () {
                         console.log('process Error');
                     },
-                    async : false
+                    async: false
                 });
-            });
+            })
         };
 
-        // Delet All Features
+            // --------------------------------------  Delet All Features -------------------------------------------
+
 
         var deletAllFeatures = function () {
             map.data.forEach(function (feature) {
@@ -121,29 +118,80 @@ block head
             });
         };
 
-        var Propagation = function() {
+
+         // ------------------------------------------- Empty map style ----------------------------------------------
 
 
+        function InitColors() {
+            map.data.setStyle(function (feature) {
+                return {
+                    fillOpacity: 0.75,
+                    strokeWeight: 0
+                };
+            });
+        };
+
+        // --------------------------------------------- Propagation --------------------------------------------------
+
+
+        var Propagation = function () {
+            var Tab = ConcMaxTab;
+            Cheked = true;
             var i = 0;
             var interval = setInterval(function () {
-                map.data.setStyle(function(feature) {
-
-                    feature.setProperty(ConcName[i], feature.getProperty(ConcName[i]) + (255 - ConcMaxTab[i]) );
+                map.data.setStyle(function (feature) {
                     return {
-
-                        fillColor: 'rgb(' + parseInt(feature.getProperty(ConcName[i])) + ',' + 0 + ',' + 0 + ')',
+                        fillColor: 'rgb(' + parseInt(feature.getProperty(ConcName[i]) / Tab[i] * 255) + ','
+                        + 0 + ',' + 0 + ')',
                         fillOpacity: 0.75,
                         strokeWeight: 0
-
                     };
-
                 });
-
                 i++;
-                if (i >= (ConcName.length -1)) clearInterval(interval);
-
+                if (i >= (ConcName.length - 1)) clearInterval(interval);
             }, 0.5);
+        };
 
+
+
+        // ----------------------------------------- Get information by feature ( Draw Chart ) ------------------------
+
+
+        function getInformation() {
+
+            map.data.addListener('click', function (event) {
+                var Dataset = new Array();
+                var Label = new Array();
+
+                for (var i = 0; i < ConcName.length; i++) {
+
+                    Dataset.push(event.feature.getProperty(ConcName[i]));
+                    Label.push("");
+                }
+
+                Label[0] = "T = 0";
+                Label[99] = "T = 100";
+                Label[200] = "T = 200";
+
+                var featureData = {
+                    labels: Label,
+                    datasets: [
+                        {
+                            fillColor: "rgba(172,194,132,0.4)",
+                            strokeColor: "#ACC26D",
+                            data: Dataset
+                        }
+                    ]
+                };
+                var opts = {
+                    pointDot: false,
+                    scaleShowGridLines: false,
+                    showTooltips: false
+                };
+
+                var featureChart = document.getElementById('featureChart').getContext('2d');
+                new Chart(featureChart).Line(featureData, opts);
+            });
         };
 
 
@@ -154,9 +202,15 @@ block body
     div#map-canvas(style="height: 600px")
     br
     br
-    button#Black(
+    button#Prop(
     title='Propagation',
     type='submit'
     style='width: 120px; height: 23px; ;'
     onclick= 'Propagation()',
     ) Propagation
+
+    br
+    br
+    br
+    br
+    canvas#featureChart(width='1100', height='400')
