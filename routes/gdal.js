@@ -27,25 +27,29 @@ router.get('/', function(req, res, next) {
 
     var list = [];
 
-    layer.features.forEach(function(feature) {
+    if(JSON.parse(req.query.zoom) > 13 ) {
 
-        if (Envelope.contains(feature.getGeometry())) {
+        layer.features.forEach(function (feature) {
 
-            list.push(feature);
-        }
-    });
+            if (Envelope.contains(feature.getGeometry())) {
 
-
-    list.forEach(function(feature) {
-
-        FeautureCollection.features.push({ "type" : "Feature" ,
-            properties : JSON.parse(feature.fields.toJSON()) ,
-            geometry : JSON.parse(feature.getGeometry().toJSON())})
+                list.push(feature);
+            }
+        });
 
 
-    });
+        list.forEach(function (feature) {
+
+            FeautureCollection.features.push({
+                "type": "Feature",
+                properties: JSON.parse(feature.fields.toJSON()),
+                geometry: JSON.parse(feature.getGeometry().toJSON())
+            })
 
 
+        });
+
+    }
 //send data to client
 
     res.send(FeautureCollection);
